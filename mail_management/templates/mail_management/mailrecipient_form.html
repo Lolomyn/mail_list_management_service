@@ -1,0 +1,18 @@
+{% extends 'mail_management/base.html' %}
+
+{% block title %}Редактирование получателя рассылки{% endblock %}
+
+{% block content %}
+    {% include 'mail_management/header.html' %}
+    <div class="container">
+        <h2 class="mt-5">Форма получателя рассылки</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <a href="{% url 'mail_management:recipient_list' %}">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </a>
+            <a href="{% url 'mail_management:recipient_list'%}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+{% endblock %}

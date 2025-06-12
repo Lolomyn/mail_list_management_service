@@ -1,0 +1,40 @@
+{% extends 'mail_management/base.html' %}
+
+{% block title %}Рассылка{% endblock %}
+
+{% block content %}
+
+    {% include 'mail_management/header.html' %}
+    <div class="container mt-5">
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Время начала рассылки</th>
+                    <th scope="col">Время окончания рассылки</th>
+                    <th scope="col">Статус</th>
+                    <th scope="col">Сообщение</th>
+                    <th scope="col">Получатели</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                {% for object in object_list %}
+                    <tbody>
+                    <tr>
+                        <th scope="row">{{ object.pk }}</th>
+                        <td>{{ object.first_submission_time }}</td>
+                        <td>{{ object.submission_time }}</td>
+                        <td>{{ object.status }}</td>
+                        <td>{{ object.message|truncatechars:30 }}</td>
+                        <td>{{ object.get_recipients_count }}</td>
+                        <td><a href="{% url 'mail_management:mailing_detail' object.pk %}"
+                               class="card-link">Подробнее</a></td>
+                    </tr>
+                    </tbody>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}
