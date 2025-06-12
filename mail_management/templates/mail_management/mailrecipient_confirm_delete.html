@@ -1,0 +1,15 @@
+{% extends 'mail_management/base.html' %}
+
+{% block title %}Подробнее о получателе{% endblock %}
+
+{% block content %}
+{% include 'mail_management/header.html' %}
+    <div class="container mt-5">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p class="card-text">Уверены, что хотите удалить получателя {{ object.email }}?</p>
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'mail_management:recipient_detail' object.pk %}" class="btn btn-secondary">Отменить</a>
+        </form>
+    </div>
+{% endblock %}
