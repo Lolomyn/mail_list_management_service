@@ -23,3 +23,50 @@
         </div>
     </div>
 </footer>
+
+{% extends 'mail_management/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        {% for mailing in object_list %}
+            <h2>Рассылка: {{ mailing.message.email_subject }}</h2>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Сообщение для рассылки</h4>
+                </div>
+                <div class="card-body">
+                    <h5>{{ mailing.message.email_subject }}</h5>
+                    <p>{{ mailing.message.email_body }}</p>
+
+                    <form method="post" action="#">
+                        {% csrf_token %}
+                        <input type="hidden" name="message" value="{{ mailing.message.id }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Запустить рассылку
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>Список получателей ({{ mailing.get_recipients_count }})</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for recipient in mailing.recipients.all %}
+                            <li class="list-group-item">
+                                {{ recipient.fullname }} &lt;{{ recipient.email }}&gt;
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">Нет получателей</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">Нет активных рассылок</div>
+        {% endfor %}
+    </div>
+{% endblock %}

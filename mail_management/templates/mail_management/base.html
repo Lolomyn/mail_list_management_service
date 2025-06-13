@@ -12,24 +12,20 @@
 
 <script src="/static/js/bootstrap.bundle.min.js"></script>
 <!-- Подключаем Flatpickr -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script> <!-- для русской локализации -->
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        flatpickr(".flatpickr-datetime", {
-            enableTime: true,  // Включаем выбор времени
-            dateFormat: "Y-m-d H:i",  // Формат даты и времени
-            time_24hr: true,  // 24-часовой формат
-            locale: "ru",  // Русская локализация
-            minuteIncrement: 1,  // Шаг минут
-            // Дополнительные настройки:
-            minDate: "today",  // Минимальная дата - сегодня
-            defaultDate: new Date(),  // Текущая дата по умолчанию
-            static: true  // Статическое позиционирование календаря
+        flatpickr('.flatpickr-datetime', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            locale: "ru"  // если нужна русская локализация
         });
     });
 </script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
 </body>
 </html>
