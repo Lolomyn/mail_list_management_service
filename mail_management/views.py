@@ -18,13 +18,13 @@ class MailRecipientListView(ListView):
     model = MailRecipient
 
 
-class MailRecipientCreateView(CreateView):
+class MailRecipientCreateView(LoginRequiredMixin, CreateView):
     model = MailRecipient
     form_class = MailRecipientsForm
     success_url = reverse_lazy('mail_management:recipient_list')
 
 
-class MailRecipientUpdateView(UpdateView):
+class MailRecipientUpdateView(LoginRequiredMixin, UpdateView):
     model = MailRecipient
     form_class = MailRecipientsForm
     success_url = reverse_lazy('mail_management:recipient_detail')
@@ -34,24 +34,24 @@ class MailRecipientUpdateView(UpdateView):
         return reverse_lazy('mail_management:recipient_detail', kwargs={'pk': pk})
 
 
-class MailRecipientDeleteView(DeleteView):
+class MailRecipientDeleteView(LoginRequiredMixin, DeleteView):
     model = MailRecipient
     success_url = reverse_lazy('mail_management:recipient_list')
 
 
-class MailRecipientDetailView(DetailView):
+class MailRecipientDetailView(LoginRequiredMixin, DetailView):
     model = MailRecipient
 
 
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     model = Message
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(LoginRequiredMixin,UpdateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('mail_management:message_detail')
@@ -61,27 +61,27 @@ class MessageUpdateView(UpdateView):
         return reverse_lazy('mail_management:message_detail', kwargs={'pk': pk})
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('mail_management:message_list')
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = Message
     success_url = reverse_lazy('mail_management:message_list')
 
 
-class MailingListView(ListView):
+class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     context_object_name = 'mailing'
 
 
-class MailingDetailView(DetailView):
+class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
 
 
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy('mail_management:mailing_detail')
@@ -91,18 +91,18 @@ class MailingUpdateView(UpdateView):
         return reverse_lazy('mail_management:mailing_detail', kwargs={'pk': pk})
 
 
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy('mail_management:mailing_list')
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = Mailing
     success_url = reverse_lazy('mail_management:mailing_list')
 
 
-class SendMailingView(View):
+class SendMailingView(LoginRequiredMixin, View):
     def post(self, request, pk):
         mailing = get_object_or_404(Mailing, pk=pk)
         mailing.update_status()
@@ -156,7 +156,7 @@ class SendMailingView(View):
         return redirect('mail_management:mailing_detail', pk=pk)
 
 
-class MailingAttemptsView(ListView):
+class MailingAttemptsView(LoginRequiredMixin, ListView):
     model = MailingAttempt
     context_object_name = 'attempts'
 

@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mail_management'
+    'mail_management',
+    'users'
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,11 @@ EMAIL_USE_SSL = True if os.getenv('EMAIL_USE_SSL') == 'True' else False
 
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Users
+AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/users/login'
+
+
