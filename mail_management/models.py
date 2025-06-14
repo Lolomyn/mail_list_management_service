@@ -3,6 +3,8 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+from users.models import User
+
 
 class MailRecipient(models.Model):
     email = models.EmailField(
@@ -25,6 +27,13 @@ class MailRecipient(models.Model):
         null=True,
         verbose_name='Комментарий',
         help_text='Введите комментарий'
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipients',
+        verbose_name='Владелец записи'
     )
 
     def clean(self):
@@ -52,6 +61,13 @@ class Message(models.Model):
     email_body = models.TextField(
         help_text='Введите текст письма',
         verbose_name='Тело письма'
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name='Создатель сообщения'
     )
 
     def __str__(self):
@@ -123,6 +139,13 @@ class Mailing(models.Model):
     recipients = models.ManyToManyField(
         MailRecipient,
         related_name='mailings'
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='mailings',
+        verbose_name='Создатель рассылки'
     )
 
     def get_recipients_count(self):

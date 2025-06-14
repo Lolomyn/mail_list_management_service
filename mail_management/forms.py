@@ -7,6 +7,7 @@ class MailRecipientsForm(forms.ModelForm):
     class Meta:
         model = MailRecipient
         fields = "__all__"
+        exclude = ['created_by']
 
     def __init__(self, *args, **kwargs):
         super(MailRecipientsForm, self).__init__(*args, **kwargs)
@@ -31,6 +32,7 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = "__all__"
+        exclude = ['created_by']
 
     def __init__(self, *args, **kwargs):
         super(MessageForm, self).__init__(*args, **kwargs)
@@ -50,6 +52,7 @@ class MailingForm(forms.ModelForm):
     class Meta:
         model = Mailing
         fields = "__all__"
+        exclude = ['created_by']
         widgets = {
             'first_submission_time': forms.DateTimeInput(
                 format='%Y-%m-%d %H:%M',
