@@ -73,7 +73,7 @@
             </li>
         </div>
         <div class="ms-auto pe-3">
-            Добро пожаловать, {{ user.username }}!
+            Добро пожаловать, <b>{{ user.username }}</b>!
         </div>
         <div>
             <form action="{% url 'users:logout' %}" method="post">

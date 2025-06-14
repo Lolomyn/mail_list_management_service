@@ -7,9 +7,11 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from mailing_list_management_service.settings import EMAIL_HOST_USER
-from users.forms import UserForm, UserRegisterForm
+from users.forms import UserForm, UserRegisterForm, UserPasswordResetForm, UserSetPasswordForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, \
+    PasswordResetConfirmView, PasswordResetCompleteView
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
@@ -55,3 +57,19 @@ def email_confirm(request, token):
     user.is_active = True
     user.save()
     return redirect(reverse('users:login'))
+
+
+class UserPasswordResetView(PasswordResetView):
+    form_class = UserPasswordResetForm
+
+    template_name = 'users/password_reset_form.html'
+    email_template_name = 'users/password_reset_email.html'
+    subject_template_name = 'users/password_reset_subject.txt'
+    success_url = reverse_lazy("users:password_reset_done")
+
+
+class UserPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = UserSetPasswordForm
+
+    template_name = 'users/password_reset_confirm.html'
+    success_url = reverse_lazy("users:password_reset_complete")
