@@ -5,12 +5,12 @@ from .models import User
 
 class CustomUserAdmin(UserAdmin):
     model = User
-    list_display = ('email', 'username')
-    list_filter = ('email', 'username')
+    list_display = ('email', 'avatar', 'phone', 'country')
+    list_filter = ('email',)
 
     fieldsets = (
         (None, {
-            'fields': ('email', 'username')
+            'fields': ('email', 'avatar', 'phone', 'country')
         }),
         ('Permissions', {
             'fields': ('is_staff', 'is_active', 'groups', 'user_permissions')
@@ -20,12 +20,12 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'password1', 'password2')
+            'fields': ('email', 'avatar', 'phone', 'country', 'password1', 'password2')
         }),
     )
 
-    search_fields = ('email', 'username')
-    ordering = ('email', 'username')
+    search_fields = ('email',)
+    ordering = ('email',)
 
 
 admin.site.register(User, CustomUserAdmin)

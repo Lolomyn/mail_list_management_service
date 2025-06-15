@@ -3,10 +3,31 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    username = None
     email = models.EmailField(
         unique=True,
         max_length=256,
         verbose_name='Email'
+    )
+
+    avatar = models.ImageField(
+        upload_to='users/avatars',
+        verbose_name='Аватар',
+        blank=True,
+        null=True,
+        help_text='Загрузите свой аватар'
+    )
+
+    phone = models.CharField(
+        blank=True,
+        verbose_name='Номер телефона',
+        null=True,
+        help_text='Введите номер телефона'
+    )
+
+    country = models.CharField(
+        verbose_name='Страна',
+        default='Россия'
     )
 
     token = models.CharField(
@@ -24,7 +45,8 @@ class User(AbstractUser):
             ('can_block_users', 'Can block users')
         ]
 
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.username
+        return self.email
