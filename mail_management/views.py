@@ -1,13 +1,13 @@
 import smtplib
 from django.core.mail import EmailMessage
-
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 
 from users.models import User
 from .models import MailRecipient, Message, Mailing, MailingAttempt
 from django.views.generic import ListView, DetailView, View
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin, OwnerRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, OwnerRequiredMixin, ManagerMixin, OrdinaryUserMixin
 from django.urls import reverse_lazy
 from .forms import MailRecipientsForm, MessageForm, MailingForm
 from django.shortcuts import get_object_or_404, redirect
@@ -19,7 +19,7 @@ class MailRecipientListView(LoginRequiredMixin, ListView):
     model = MailRecipient
 
 
-class MailRecipientCreateView(LoginRequiredMixin, CreateView):
+class MailRecipientCreateView(LoginRequiredMixin, OrdinaryUserMixin, CreateView):
     model = MailRecipient
     form_class = MailRecipientsForm
     success_url = reverse_lazy('mail_management:recipient_list')
@@ -47,6 +47,20 @@ class MailRecipientDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView
 class MailRecipientDetailView(LoginRequiredMixin, DetailView):
     model = MailRecipient
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+
+        if request.user.groups.filter(name='Менеджеры').exists():
+            return super().dispatch(request, *args, **kwargs)
+
+        if obj.created_by == request.user:
+            return super().dispatch(request, *args, **kwargs)
+
+        raise PermissionDenied("У вас нет прав доступа к этому объекту")
+
 
 class MessageListView(LoginRequiredMixin, ListView):
     model = Message
@@ -66,7 +80,7 @@ class MessageUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
         return reverse_lazy('mail_management:message_detail', kwargs={'pk': pk})
 
 
-class MessageCreateView(LoginRequiredMixin, CreateView):
+class MessageCreateView(LoginRequiredMixin, OrdinaryUserMixin, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('mail_management:message_list')
@@ -110,10 +124,18 @@ class MailingUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
         return reverse_lazy('mail_management:mailing_detail', kwargs={'pk': pk})
 
 
-class MailingCreateView(LoginRequiredMixin, CreateView):
+class MailingCreateView(LoginRequiredMixin, OrdinaryUserMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy('mail_management:mailing_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        form.fields['recipients'].queryset = MailRecipient.objects.filter(created_by=self.request.user)
+        form.fields['message'].queryset = Message.objects.filter(created_by=self.request.user)
+
+        return form
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -193,12 +215,12 @@ class MailingAttemptsView(LoginRequiredMixin, ListView):
         return context
 
 
-class UserListView(LoginRequiredMixin, ListView):
+class UserListView(LoginRequiredMixin, ManagerMixin, ListView):
     model = User
     template_name = 'mail_management/user_list.html'
 
 
-class ToggleUserActiveView(LoginRequiredMixin, View):
+class ToggleUserActiveView(LoginRequiredMixin, ManagerMixin, View):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
 

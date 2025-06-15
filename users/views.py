@@ -10,8 +10,10 @@ from mailing_list_management_service.settings import EMAIL_HOST_USER
 from users.forms import UserForm, UserRegisterForm, UserPasswordResetForm, UserSetPasswordForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, \
-    PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.views import PasswordResetView, \
+    PasswordResetConfirmView
+
+from django.contrib.auth.models import Group
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
@@ -43,12 +45,17 @@ class UserCreateView(CreateView):
 
         host = self.request.get_host()
         url = f'http://{host}/users/email_confirm/{token}'
+
         send_mail(
             subject='Подтверждение почты',
             message=f'Привет, спасибо за регистрацию! Перейди по ссылку для подтверждения почты: {url}',
             from_email=EMAIL_HOST_USER,
             recipient_list=[user.email]
         )
+        group = Group.objects.get(name='Пользователи')
+        group.user_set.add(user)
+        user.save()
+
         return super().form_valid(form)
 
 

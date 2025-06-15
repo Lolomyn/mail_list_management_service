@@ -113,17 +113,3 @@ class MailingForm(forms.ModelForm):
                 )
 
         return cleaned_data
-
-
-class ManagerMailingForm(forms.ModelForm):
-    class Meta:
-        model = Mailing
-        fields = ('status', )
-
-    def __init__(self, *args, **kwargs):
-        super(ManagerMailingForm, self).__init__(*args, **kwargs)
-
-        self.fields['status'].widget.attrs.update({
-            'class': 'form-control',
-            'placeholder': 'Выберите статус рассылки'
-        })
