@@ -50,6 +50,11 @@ class MailRecipient(models.Model):
         verbose_name_plural = 'Получатели рассылки'
         ordering = ['email', 'fullname']
 
+        permissions = [
+            ('can_view_recipients', 'Can view recipients'),
+            ('can_edit_recipients', 'Can edit recipients')
+        ]
+
 
 class Message(models.Model):
     email_subject = models.CharField(
@@ -77,6 +82,11 @@ class Message(models.Model):
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
         ordering = ['email_subject']
+
+        permissions = [
+            ('can_view_messages', 'Can view messages'),
+            ('can_edit_messages', 'Can edit messages')
+        ]
 
 
 class Mailing(models.Model):
@@ -180,6 +190,13 @@ class Mailing(models.Model):
         verbose_name_plural = 'Рассылки'
         ordering = ['message']
 
+        permissions = [
+            ('can_view_mailings', 'Can view mailings'),
+            ('can_edit_mailings', 'Can edit mailings'),
+            ('can_disable_mailings', 'Can disable mailings'),
+            ('can_view_mailing_stat', 'Can view statistics of mailings')
+        ]
+
 
 class MailingAttempt(models.Model):
     SUCCESS = 'success'
@@ -206,6 +223,7 @@ class MailingAttempt(models.Model):
         null=True,
         verbose_name='Ответ почтового сервера'
     )
+
     mailing = models.ForeignKey(
         Mailing,
         on_delete=models.CASCADE,
@@ -220,6 +238,19 @@ class MailingAttempt(models.Model):
         blank=True,
         verbose_name='Получатель'
     )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='attempt_mailings',
+        verbose_name='Создатель попытки рассылки'
+    )
+
+    def save(self, *args, **kwargs):
+        """Автоматически устанавливаем владельца из рассылки"""
+        if not self.created_by_id and self.mailing_id:
+            self.owner = self.mailing.created_by
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (f"Попытка #{self.id} для рассылки #{self.mailing.id} - "

@@ -72,8 +72,16 @@
                 </ul>
             </li>
         </div>
+
         <div class="ms-auto pe-3">
             Добро пожаловать, <b>{{ user.username }}</b>!
+        </div>
+        <div class="pe-3">
+            {% if perms.users.can_view_users %}
+                <a href="{% url 'mail_management:users' %}" class="btn btn-outline-primary">
+                    Пользователи
+                </a>
+            {% endif %}
         </div>
         <div>
             <form action="{% url 'users:logout' %}" method="post">
