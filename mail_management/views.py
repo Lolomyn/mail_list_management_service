@@ -13,6 +13,8 @@ from .forms import MailRecipientsForm, MessageForm, MailingForm
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 
 class MailRecipientListView(LoginRequiredMixin, ListView):
@@ -44,6 +46,7 @@ class MailRecipientDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView
     success_url = reverse_lazy('mail_management:recipient_list')
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class MailRecipientDetailView(LoginRequiredMixin, DetailView):
     model = MailRecipient
 
@@ -66,6 +69,7 @@ class MessageListView(LoginRequiredMixin, ListView):
     model = Message
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
 
@@ -129,6 +133,7 @@ class MailingListView(LoginRequiredMixin, ListView):
         return context
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
 
@@ -268,7 +273,10 @@ def main(request):
     mailing_list = Mailing.objects.all()
     recipient_list = MailRecipient.objects.all()
 
+    active_mailings = mailing_list.filter(status=Mailing.START).count()
+
     context = {
+        'active_mailings': active_mailings,
         'mailing_list': mailing_list,
         'recipient_list': recipient_list,
     }
