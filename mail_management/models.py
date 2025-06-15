@@ -164,9 +164,12 @@ class Mailing(models.Model):
     def update_status(self):
         now = timezone.now()
 
+        self.last_sent = now
+
         if self.status != self.END and now > self.submission_time:
             self.status = self.END
             self.save()
+
         return self.status
 
     def can_be_sent(self):
@@ -178,9 +181,23 @@ class Mailing(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        # При сохранении автоматически обновляем статус
         self.update_status()
         super().save(*args, **kwargs)
+
+    def get_mailing_stats(self):
+        attempts = MailingAttempt.objects.filter(mailing__owner=self)
+
+        total = attempts.count()
+        success = attempts.filter(status=MailingAttempt.SUCCESS).count()
+        failed = total - success
+
+        return {
+            'total_mailings': Mailing.objects.filter(created_by=self).count(),
+            'total_attempts': total,
+            'success_attempts': success,
+            'failed_attempts': failed,
+            'success_rate': (success / total * 100) if total > 0 else 0,
+        }
 
     def __str__(self):
         return f'Рассылка #{self.pk} - {self.message} ({self.get_status_display()})'
@@ -239,29 +256,26 @@ class MailingAttempt(models.Model):
         verbose_name='Получатель'
     )
 
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='attempt_mailings',
-        verbose_name='Создатель попытки рассылки'
-    )
-
-    def save(self, *args, **kwargs):
-        """Автоматически устанавливаем владельца из рассылки"""
-        if not self.created_by_id and self.mailing_id:
-            self.owner = self.mailing.created_by
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return (f"Попытка #{self.id} для рассылки #{self.mailing.id} - "
-                f"{self.get_status_display()} ({self.attempt_datetime})")
+        return f"Попытка #{self.id} ({self.get_status_display()})"
+
+    def mark_as_success(self, response=""):
+        """Пометить попытку как успешную"""
+        self.status = self.SUCCESS
+        self.server_response = response
+        self.save()
+
+    def mark_as_failed(self, error_message):
+        """Пометить попытку как неудачную"""
+        self.status = self.FAILURE
+        self.server_response = str(error_message)[:500]  # Ограничиваем длину сообщения
+        self.save()
 
     class Meta:
         verbose_name = 'Попытка рассылки'
         verbose_name_plural = 'Попытки рассылки'
         ordering = ['-attempt_datetime']
         indexes = [
-            models.Index(fields=['mailing']),
-            models.Index(fields=['status']),
+            models.Index(fields=['mailing', 'status']),
             models.Index(fields=['attempt_datetime']),
         ]

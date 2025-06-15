@@ -19,7 +19,7 @@
 
                 {% for object in object_list %}
                     <tbody class="align-text-top">
-                    {% if request.user == object.created_by or "Менеджеры" in request.user.groups.all|join:", " %}
+                    {% if request.user == object.created_by or "Менеджеры" in request.user.groups.all|join:", " or request.user.is_superuser %}
                         <tr>
                             <th scope="row">{{ object.pk }}</th>
                             <td>{{ object.email_subject }}</td>

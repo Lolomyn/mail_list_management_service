@@ -5,7 +5,6 @@
     <div class="container mt-5">
 
         <h1>Попытки отправки рассылки #{{ mailing.id }}</h1>
-
         <div class="row">
 
             <table class="table">
@@ -26,9 +25,10 @@
                         <td>{{ attempt.get_status_display }}</td>
                         <td>{{ attempt.mail_response|truncatechars:50 }}</td>
                     </tr>
+
                 {% empty %}
                     <tr>
-                        <td colspan="4">Попыток отправки не найдено</td>
+                        <td colspan="4">Попытки отправки не найдено</td>
                     </tr>
                 {% endfor %}
                 </tbody>

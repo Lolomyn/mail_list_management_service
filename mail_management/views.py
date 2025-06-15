@@ -2,7 +2,7 @@ import smtplib
 from django.core.mail import EmailMessage
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
-
+from django.db.models import Count, Q
 from users.models import User
 from .models import MailRecipient, Message, Mailing, MailingAttempt
 from django.views.generic import ListView, DetailView, View
@@ -99,6 +99,35 @@ class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     context_object_name = 'mailing'
 
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(created_by=self.request.user)
+        return queryset.annotate(
+            total_attempts=Count('attempts'),
+            success_attempts=Count('attempts', filter=Q(attempts__status='success')),
+            failed_attempts=Count('attempts', filter=Q(attempts__status='failure')),
+            total_messages=Count('attempts__recipient')
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Общая статистика по всем рассылкам пользователя
+        total_stats = Mailing.objects.filter(created_by=self.request.user).aggregate(
+            total_mailings=Count('id'),
+            total_attempts=Count('attempts'),
+            success_attempts=Count('attempts', filter=Q(attempts__status='success')),
+            total_messages=Count('attempts__recipient'),
+        )
+
+        context['total_stats'] = {
+            'attempts': total_stats['total_attempts'],
+            'success': total_stats['success_attempts'],
+            'failed': total_stats['total_attempts'] - total_stats['success_attempts'],
+            'messages': total_stats['total_messages'],
+        }
+
+        return context
+
 
 class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
@@ -148,7 +177,11 @@ class MailingDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
 
 
 class SendMailingView(LoginRequiredMixin, View):
+    success_count = 0
+    failure_count = 0
+
     def post(self, request, pk):
+        now = timezone.now()
         mailing = get_object_or_404(Mailing, pk=pk)
         mailing.update_status()
 
@@ -157,8 +190,6 @@ class SendMailingView(LoginRequiredMixin, View):
             return redirect('mail_management:mailing_detail', pk=pk)
 
         recipients = mailing.recipients.all()
-        success_count = 0
-        failure_count = 0
 
         for recipient in recipients:
             attempt = MailingAttempt(
@@ -177,26 +208,27 @@ class SendMailingView(LoginRequiredMixin, View):
 
                 attempt.status = MailingAttempt.SUCCESS
                 attempt.mail_response = "Сообщение успешно отправлено"
-                success_count += 1
+                self.success_count += 1
 
             except smtplib.SMTPException as e:
                 attempt.status = MailingAttempt.FAILURE
                 attempt.mail_response = str(e)
-                failure_count += 1
+                self.failure_count += 1
                 messages.error(request, f'Ошибка отправки для {recipient.email}: {str(e)}')
 
             attempt.save()
 
-        # Обновляем статус рассылки
         if mailing.status != Mailing.START:
             mailing.status = Mailing.START
             mailing.save()
 
+        mailing.last_sent = now
+        mailing.save()
         mailing.update_status()
 
         messages.success(
             request,
-            f'Рассылка отправлена. Успешно: {success_count}, Неудачно: {failure_count}'
+            f'Рассылка отправлена. Успешно: {self.success_count}, Неудачно: {self.failure_count}'
         )
         return redirect('mail_management:mailing_detail', pk=pk)
 
