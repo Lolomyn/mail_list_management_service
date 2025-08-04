@@ -1,0 +1,64 @@
+{% extends 'mail_management/base.html' %}
+
+{% block title %}Рассылка{% endblock %}
+
+{% block content %}
+
+    {% include 'mail_management/header.html' %}
+    <div class="container mt-5">
+        <div class="d-flex">
+            <p class="rounded alert-info p-2 me-2">
+                Количество успешных рассылок: {{ total_stats.success }}
+            </p>
+            <p class="rounded alert-danger p-2 me-2">
+                Количество неудачных рассылок: {{ total_stats.failed }}
+            </p>
+            <p class="rounded alert-secondary p-2">
+                Количество отправленных сообщений: {{ total_stats.messages }}
+            </p>
+        </div>
+
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Статус</th>
+                    <th scope="col">Периодичность</th>
+                    <th scope="col">Первая отправка</th>
+                    <th scope="col">Последняя отправка</th>
+                    <th scope="col">Конец рассылки</th>
+                    <th scope="col">Получателей</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                {% for object in mailing %}
+                    <tbody class="align-text-top">
+                    {% if request.user == object.created_by or "Менеджеры" in request.user.groups.all|join:", " or request.user.is_superuser %}
+                        <tr>
+                            <th scope="row">{{ object.pk }}</th>
+                            <td>{{ object.status }}</td>
+                            <td>{{ object.frequency }}</td>
+                            <td>{{ object.first_submission_time }}</td>
+                            <td>{{ object.last_sent }}</td>
+                            <td>{{ object.submission_time }}
+                            <td>{{ object.recipients.count }}</td>
+                            <td>
+                                <a href="{% url 'mail_management:mailing_detail' object.pk %}"
+                                   class="card-link btn btn-outline-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-search" viewBox="0 0 16 16">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                    </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    </tbody>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

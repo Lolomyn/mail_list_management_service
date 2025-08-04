@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сервис рассылки{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body>
+
+{% block content %}{% endblock %}
+
+<script src="/static/js/bootstrap.bundle.min.js"></script>
+<!-- Подключаем Flatpickr -->
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr('.flatpickr-datetime', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            locale: "ru"  // если нужна русская локализация
+        });
+    });
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% extends 'mail_management/base.html' %}
+
+{% block title %}Список пользователей{% endblock %}
+
+{% block content %}
+    {% include 'mail_management/header.html' %}
+    <div class="container mt-5">
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Имя пользователя</th>
+                    <th scope="col">Активен</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                {% for object in object_list %}
+                    {% if not object.is_superuser %}
+                        <tbody class="align-text-top">
+                        <tr>
+                            <th scope="row">{{ object.pk }}</th>
+                            <td>{{ object.email }}</td>
+                            <td>{{ object.username }}</td>
+                            <td>{{ object.is_active }}</td>
+                            <td>
+                                <form method="post" action="{% url 'mail_management:toggle_user_active' object.pk %}">
+                                    {% csrf_token %}
+                                    {% if object.is_active %}
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            Заблокировать
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            Разблокировать
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    {% endif %}
+
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}
