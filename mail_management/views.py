@@ -7,7 +7,8 @@ from users.models import User
 from .models import MailRecipient, Message, Mailing, MailingAttempt
 from django.views.generic import ListView, DetailView, View
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin, OwnerRequiredMixin, ManagerMixin, OrdinaryUserMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .mixins import OwnerRequiredMixin, ManagerMixin, OrdinaryUserMixin
 from django.urls import reverse_lazy
 from .forms import MailRecipientsForm, MessageForm, MailingForm
 from django.shortcuts import get_object_or_404, redirect
