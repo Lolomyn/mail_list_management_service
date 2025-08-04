@@ -8,14 +8,7 @@
         <div class="card">
 
             <div class="card-body">
-                <h5 class="card-title">Активные рассылки</h5>
-                <p class="card-text">
-                    {% for mailing in mailing_list %}
-                        {% if mailing.status == 'Запущена' %}
-                            <p>{{ mailing }}</p>
-                        {% endif %}
-
-                    {% endfor %}
+                <h3 class="card-title">Активных рассылок: {{ active_mailings }}</h3>
                 <a class="btn btn-outline-primary" href="{% url 'mail_management:mailing_list' %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                          class="bi bi-list-nested" viewBox="0 0 16 16">

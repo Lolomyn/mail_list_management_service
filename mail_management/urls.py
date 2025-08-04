@@ -26,4 +26,7 @@ urlpatterns = [
     path('mailings/<int:pk>/send/', views.SendMailingView.as_view(), name='mailing_send'),
 
     path('mailings/<int:pk>/attempts/', views.MailingAttemptsView.as_view(), name='mailing_attempts_list'),
+
+    path('users/', views.UserListView.as_view(), name='users'),
+    path('users/<int:pk>/toggle_active/', views.ToggleUserActiveView.as_view(), name='toggle_user_active')
 ]

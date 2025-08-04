@@ -52,7 +52,7 @@ class MailingForm(forms.ModelForm):
     class Meta:
         model = Mailing
         fields = "__all__"
-        exclude = ['created_by']
+        exclude = ['last_sent', 'created_by']
         widgets = {
             'first_submission_time': forms.DateTimeInput(
                 format='%Y-%m-%d %H:%M',
@@ -79,6 +79,11 @@ class MailingForm(forms.ModelForm):
         self.fields['status'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Выберите статус рассылки'
+        })
+
+        self.fields['frequency'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Выберите периодичность отправки'
         })
 
         self.fields['message'].widget.attrs.update({

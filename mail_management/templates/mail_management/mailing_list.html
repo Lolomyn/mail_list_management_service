@@ -6,6 +6,18 @@
 
     {% include 'mail_management/header.html' %}
     <div class="container mt-5">
+        <div class="d-flex">
+            <p class="rounded alert-info p-2 me-2">
+                Количество успешных рассылок: {{ total_stats.success }}
+            </p>
+            <p class="rounded alert-danger p-2 me-2">
+                Количество неудачных рассылок: {{ total_stats.failed }}
+            </p>
+            <p class="rounded alert-secondary p-2">
+                Количество отправленных сообщений: {{ total_stats.messages }}
+            </p>
+        </div>
+
         <div class="row">
             <table class="table">
                 <thead>
@@ -22,8 +34,8 @@
                 </thead>
 
                 {% for object in mailing %}
-                    {% if user == object.created_by or request.user.is_superuser %}
-                        <tbody class="align-text-top">
+                    <tbody class="align-text-top">
+                    {% if request.user == object.created_by or "Менеджеры" in request.user.groups.all|join:", " or request.user.is_superuser %}
                         <tr>
                             <th scope="row">{{ object.pk }}</th>
                             <td>{{ object.status }}</td>
@@ -42,9 +54,9 @@
                                 </a>
                             </td>
                         </tr>
-                        </tbody>
                     {% endif %}
 
+                    </tbody>
                 {% endfor %}
             </table>
         </div>

@@ -68,9 +68,22 @@
                             </button>
                         </form>
                     {% endif %}
-                    <a href="{% url 'mail_management:mailing_attempts_list' object.pk %}" class="btn btn-info mt-3">
-                        Просмотреть попытки отправки
-                    </a>
+
+                    {% if request.user == object.created_by or request.user.is_superuser %}
+                        <a href="{% url 'mail_management:mailing_attempts_list' object.pk %}" class="btn btn-info mt-3">
+                            Просмотреть попытки отправки
+                        </a>
+                    {% endif %}
+
+                    {% if perms.mail_management.can_disable_mailings and object.status != object.END %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger mt-3">
+                                Отключить рассылку
+                            </button>
+                        </form>
+                    {% endif %}
+
                 </div>
 
             </div>

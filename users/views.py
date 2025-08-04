@@ -1,27 +1,39 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import DetailView
+from django.views.generic import ListView
 import secrets
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from mailing_list_management_service.settings import EMAIL_HOST_USER
-from users.forms import UserForm, UserRegisterForm, UserPasswordResetForm, UserSetPasswordForm
+from users.forms import UserForm, UserRegisterForm, UserPasswordResetForm, UserSetPasswordForm, UserUpdateForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, \
-    PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.views import PasswordResetView, \
+    PasswordResetConfirmView
+from django.contrib.auth.models import Group
 
 
-class UserUpdateView(LoginRequiredMixin, UpdateView):
+# class UserUpdateView(LoginRequiredMixin, UpdateView):
+#     model = User
+#     form_class = UserForm
+#     success_url = reverse_lazy('users:user_detail')
+
+
+class CurrentUserUpdateView(LoginRequiredMixin, UpdateView):
     model = User
-    form_class = UserForm
-    success_url = reverse_lazy('mail_management:main')
+    form_class = UserUpdateForm
+    template_name = 'users/user_update_form.html'
+    success_url = reverse_lazy('users:user_detail')
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
+class UserListView(LoginRequiredMixin, ListView):
     model = User
+    template_name = 'users/user_detail.html'
 
 
 class UserDeleteView(LoginRequiredMixin, DeleteView):
@@ -43,12 +55,17 @@ class UserCreateView(CreateView):
 
         host = self.request.get_host()
         url = f'http://{host}/users/email_confirm/{token}'
+
         send_mail(
             subject='Подтверждение почты',
             message=f'Привет, спасибо за регистрацию! Перейди по ссылку для подтверждения почты: {url}',
             from_email=EMAIL_HOST_USER,
             recipient_list=[user.email]
         )
+        group = Group.objects.get(name='Пользователи')
+        group.user_set.add(user)
+        user.save()
+
         return super().form_valid(form)
 
 
